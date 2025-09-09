@@ -8,7 +8,7 @@ function Actor(tags, state) {
     this.state = state
     this.with = function (tagList) {
         for (const i of tagList) {
-            flag = false
+            let flag = false
             for (const tg of this.tags) {
                 if (tg == i) {
                     flag = true
@@ -21,25 +21,25 @@ function Actor(tags, state) {
 }
 function Query(objList) {
     this.with = function (tagList) {
-        nList = []
+        let nList = []
         for (const o of objList) {
             if (o.with(tagList)) {
                 nList.push(o)
             }
         }
-        return Query(nList)
+        return new Query(nList)
     }
-    this.array = function (tagList) {
-        return tagList
+    this.array = function () {
+        return objList
     }
 }
 
 export function World(canvas) {
-    id2Object = new Map()
-    id = 0
+    let id2Object = new Map()
+    let id = 0
     this.canvas = canvas
 
-    this.spawn() = function ({
+    this.spawn = function ({
         tags, state
     }) {
         id2Object.set(id, new Actor(tags, state))
