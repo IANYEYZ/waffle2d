@@ -33,7 +33,7 @@ function Query(objList) {
         return objList
     }
 }
-export function Input(canvas, { worldFromScreen = null } = {}) {
+function Input(canvas, { worldFromScreen = null } = {}) {
     const codeDown = new Set();
     const actionBindings = new Map();
     let axes = new Map();
@@ -214,6 +214,25 @@ export function Input(canvas, { worldFromScreen = null } = {}) {
 
     attach();
 }
+function Painter(canvas) {
+    const ctx = canvas.getContext("2d")
+
+    this.pen = {
+        fill: "#FFFFFF",
+        stroke: "#000000"
+    }
+    this.rect = function (style, x, y, w, h) {
+        for (const s of style) {
+            if (s == "stroke") {
+                ctx.strokeStyle = this.pen.stroke
+                ctx.strokeRect(x, y, w, h)
+            } else if (s == "fill") {
+                ctx.fillStyle = this.pen.fill
+                ctx.fillRect(x, y, w, h)
+            }
+        }
+    }
+}
 
 
 export function World(canvas, fps = 60) {
@@ -224,6 +243,7 @@ export function World(canvas, fps = 60) {
 
     this.canvas = canvas
     this.input = new Input(canvas)
+    this.painter = new Painter(canvas)
 
     this.spawn = function ({
         tags, state
@@ -232,23 +252,19 @@ export function World(canvas, fps = 60) {
         id += 1
         return id - 1
     }
-
     this.q = function () {
         return new Query([ ...id2Object.values() ])
     }
-
     this.system = function (fn, priority) {
         systems.push([fn, priority])
         systems.sort((a, b) => a[1] - b[1])
     }
-
     this.flush = function () {
         for (const i of systems) {
-            i[0](dt, { q: this.q(), input: this.input })
+            i[0](dt, { q: this.q(), input: this.input, painter: this.painter })
         }
         this.input.sample()
     }
-
     this.start = function () {
         setInterval(this.flush.bind(this), dt)
     }

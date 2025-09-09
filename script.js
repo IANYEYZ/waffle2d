@@ -10,7 +10,8 @@ const obj1 = app.spawn({
 
 console.log(app.q().with(["pos"]).array())
 app.input.bind("Jump", ["Space", "MouseLeft"])
-app.system((dt, { q, input }) => {
+app.system((dt, { q, input, painter }) => {
+    painter.rect(["fill", "stroke"], 0, 0, 100, 100)
     if (input.pressed("Jump")) {
         console.log("Jump!", input.mouse.world)
     }
