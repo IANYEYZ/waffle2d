@@ -4,15 +4,33 @@ Waffle2D is a minimalist 2D game-making framework based on HTML canvas
 export function $(query) { return document.querySelector(query) }  // Helper
 
 function Actor(tags, state) {
-    return {tags: tags, state: state} // Placeholder
-}
-function Query(id2Object) {
+    this.tags = tags
+    this.state = state
     this.with = function (tagList) {
-        for (const o of id2Object) {
+        for (const i of tagList) {
             flag = false
-            for (const i of tagList) {
+            for (const tg of this.tags) {
+                if (tg == i) {
+                    flag = true
+                }
+            }
+            if (!flag) return false
+        }
+        return true
+    }
+}
+function Query(objList) {
+    this.with = function (tagList) {
+        nList = []
+        for (const o of objList) {
+            if (o.with(tagList)) {
+                nList.push(o)
             }
         }
+        return Query(nList)
+    }
+    this.array = function (tagList) {
+        return tagList
     }
 }
 
@@ -24,11 +42,12 @@ export function World(canvas) {
     this.spawn() = function ({
         tags, state
     }) {
-        id2Object.set(id, Actor(tags, state))
+        id2Object.set(id, new Actor(tags, state))
         id += 1
         return id - 1
     }
 
-    this.q = {
+    this.q = function () {
+        return new Query([ ...id2Object.values() ])
     }
 }
