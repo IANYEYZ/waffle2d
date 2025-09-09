@@ -244,7 +244,6 @@ export function World(canvas, fps = 60) {
     this.canvas = canvas
     this.input = new Input(canvas)
     this.painter = new Painter(canvas)
-
     this.spawn = function ({
         tags, state
     }) {
