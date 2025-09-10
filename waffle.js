@@ -18,6 +18,14 @@ function Actor(tags, state) {
         }
         return true
     }
+    this.inside = function (pos) {
+        // require state.Transform && state.Body
+        if (Array.isArray(pos)) {
+            pos = { x: pos[0], y: pos[1] }
+        }
+        return pos.x >= this.state.Transform.x && pos.x <= this.state.Transform.x + this.state.Body.w &&
+            pos.y >= this.state.Transform.y && pos.y <= this.state.Transform.y + this.state.Body.h
+    }
 }
 function Query(objList) {
     this.with = function (tagList) {
@@ -215,7 +223,25 @@ function Input(canvas, { worldFromScreen = null } = {}) {
     attach();
 }
 function Painter(canvas) {
-    const ctx = canvas.getContext("2d")
+    function setupPixelCanvas(canvas) {
+        // CSS size controls layout; we’ll match backing pixels to DPR.
+        const dpr = Math.max(1, Math.round(window.devicePixelRatio || 1));
+        const rect = canvas.getBoundingClientRect();
+
+        canvas.width  = Math.round(rect.width)  * dpr;
+        canvas.height = Math.round(rect.height) * dpr;
+
+        const ctx = canvas.getContext('2d', { alpha: true });
+        // Important bits:
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.imageSmoothingEnabled = false;
+        ctx.imageSmoothingQuality = 'low'; // defensive; key is line above
+        ctx.scale(dpr, dpr);               // draw in CSS pixels; canvas stores device pixels
+
+        return ctx;
+    }
+
+    const ctx = setupPixelCanvas(canvas)
 
     this.pen = {
         fill: "#FFFFFF",
@@ -231,6 +257,12 @@ function Painter(canvas) {
                 ctx.fillRect(x, y, w, h)
             }
         }
+        return this
+    }
+    this.image = function (img, x, y, w, h) {
+        if (w == undefined) ctx.drawImage(img, x, y)
+        else ctx.drawImage(img, x, y, w, h)
+        return this
     }
 }
 
